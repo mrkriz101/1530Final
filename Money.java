@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 public class Money {
     static JPanel contentPanel;
     static JPanel expenseLoggingPanel;
-    static JPanel budgetPanel;
-    static JPanel savingsPanel;
     static JFrame frame;
     static CardLayout cardLayout;
 
@@ -30,17 +28,14 @@ public class Money {
         cardLayout = new CardLayout();
         contentPanel.setLayout(cardLayout);
 
-        budgetPanel = new JPanel();
+        JPanel budgetPanel = new JPanel();
         budgetPanel.add(new JLabel("Budget Content!"));
-        budgetPanel.setVisible(false); // Hide the budgetPanel initially
-
+        
         expenseLoggingPanel = new JPanel();
         expenseLoggingPanel.setLayout(new GridLayout(5, 2, 5, 5));
-        expenseLoggingPanel.setVisible(false); // Hide the expenseLoggingPanel initially
 
-        savingsPanel = new JPanel();
+        JPanel savingsPanel = new JPanel();
         savingsPanel.add(new JLabel("Savings Content!"));
-        savingsPanel.setVisible(false); // Hide the savingsPanel initially
 
         contentPanel.add(budgetPanel, "Budget");
         contentPanel.add(expenseLoggingPanel, "ExpenseLogging");
@@ -102,9 +97,6 @@ public class Money {
                 String curUsername = user.getText();
                 navPanel.setVisible(true);
                 loginPanel.setVisible(false);
-                budgetPanel.setVisible(true); // Show the budgetPanel after login
-                expenseLoggingPanel.setVisible(true); // Show the expenseLoggingPanel after login
-                savingsPanel.setVisible(true); // Show the savingsPanel after login
             }
         });
     }
@@ -121,6 +113,36 @@ public class Money {
         descriptionArea.setLineWrap(true);
         JScrollPane scrollPane = new JScrollPane(descriptionArea);
 
+        JButton submitButton = new JButton("Submit");
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get entered information
+                int amount = Integer.parseInt(amountField.getText());
+                String category = (String) categoryComboBox.getSelectedItem();
+                String frequency = frequencyField.getText();
+                String description = descriptionArea.getText();
+
+                // Create Expense object
+                Expenses expense = new Expenses(amount, category, frequency, description);
+
+                // Add expense to the list of expenses
+                //user.expenses.add(expense);
+
+                // Optional: Print the added expense for verification
+                System.out.println("Added Expense: " + expense.getAmount() + " | " +
+                                   expense.getCategory() + " | " +
+                                   expense.getFrequency() + " | " +
+                                   expense.getDescription());
+
+                // Clear input fields after submitting
+                amountField.setText("");
+                frequencyField.setText("");
+                descriptionArea.setText("");
+            }
+        });
+
         expenseLoggingPanel.removeAll();
         expenseLoggingPanel.add(categoryLabel);
         expenseLoggingPanel.add(categoryComboBox);
@@ -130,6 +152,7 @@ public class Money {
         expenseLoggingPanel.add(amountField);
         expenseLoggingPanel.add(descriptionLabel);
         expenseLoggingPanel.add(scrollPane);
+        expenseLoggingPanel.add(submitButton); // Add submit button
 
         frame.revalidate();
         frame.repaint();
