@@ -6,16 +6,39 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.*;
-
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.*;
+import java.io.*;
+import java.net.*;
 
 public class Money {
-    public static void main(String[] args) {
-        String userName;
 
+    private Socket socket = null;
+    private DataInputStream input = null;
+    private DataOutputStream out = null; 
+    
+
+    public Socket clientConnection(){
+        try{
+            socket = new Socket("localhost", 1234);
+            System.out.println("Connected");
+            return socket;
+        }
+        catch (UnknownHostException u) {
+            System.out.println(u);
+            return null;
+        }
+        catch (IOException i) {
+            System.out.println(i);
+            return null;
+        }
+    }
+
+    public static void main(String[] args) {
+        String[] userName = new String[1];
+        boolean[] pushed = new boolean[1];
+        pushed[0] = false;
         // Create a JFrame
         JFrame frame = new JFrame("Money Application");
 
@@ -106,13 +129,60 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e){
                 String curUsername = user.getText();
-
+                
                 // check for existence of user within "database"
                 navPanel.setVisible(true);
                 loginPanel.setVisible(false);
                 contentArea.setText("Welcome "+curUsername+"!");
                 contentArea.setVisible(true);
+                userName[0] = curUsername;
+                pushed[0] = true;
             }
         });
+
+
+        
+
+        Money client = new Money();
+        Socket socket = client.clientConnection();
+        if(socket == null){
+            System.out.println("Socket is null");
+        }
+        else{
+            System.out.println("Socket is not null");
+        }
+
+        while(!pushed[0]){
+            System.out.println("Waiting for button to be pushed");
+        }
+        
+        //send the username to the server
+        try{
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.writeUTF(userName[0]);
+        }
+        catch(IOException i){
+            System.out.println(i);
+        }
+        System.out.println("Username sent to server: " + userName[0]);
+        //read the user back from the server
+        try {
+            InputStream input = socket.getInputStream();
+            ObjectInputStream in = new ObjectInputStream(input);
+            
+            // Read the object from the stream
+            User Actualuser = (User) in.readObject();
+            System.out.println("User received from server: " + Actualuser.getName());
+            
+            in.close(); // Close the ObjectInputStream
+        } catch (IOException i) {
+            System.out.println("IOException while reading from input stream: " + i.getMessage());
+            i.printStackTrace(); // Print the stack trace for more details
+        } catch (ClassNotFoundException c) {
+            System.out.println("Class not found while deserializing object: " + c.getMessage());
+            c.printStackTrace(); // Print the stack trace for more details
+        }
+        
+    
     }
 }

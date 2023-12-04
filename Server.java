@@ -8,7 +8,7 @@ public class Server
     private Socket          socket   = null;
     private ServerSocket    server   = null;
     private DataInputStream in       =  null;
- 
+    UserStorage userStorage = new UserStorage();
     // constructor with port
     public Server(int port)
     {
@@ -35,8 +35,28 @@ public class Server
                 try
                 {
                     line = in.readUTF();
-                    System.out.println(line);
- 
+                    System.out.println("Searching for user " + line);
+                    User user;
+                    if(userStorage.containsUser(line))
+                    {
+                        System.out.println("User found sending user:");
+                        user = userStorage.getUser(line);
+                    
+                    }
+                    else
+                    {
+                        System.out.println("User not found creating new user: ");
+                        user = new User(line);
+                        userStorage.addUser(user);
+                    }
+                    //send the user back to the client
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(baos);
+                    System.out.println("Sending user " + user.getName());
+                    oos.writeObject(user);
+                    oos.flush();
+                    byte[] userBytes = baos.toByteArray();
+                    socket.getOutputStream().write(userBytes);
                 }
                 catch(IOException i)
                 {
@@ -57,6 +77,6 @@ public class Server
  
     public static void main(String args[])
     {
-        Server server = new Server(5000);
+        Server server = new Server(1234);
     }
 }
