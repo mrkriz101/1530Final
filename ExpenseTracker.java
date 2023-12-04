@@ -79,7 +79,7 @@ public class ExpenseTracker extends JFrame {
             // Process the expense data (you can add your own logic here)
             // For now, just display the entered data
             String expenseInfo = "Category: " + expense.getCategory() + "\nAmount: $" + expense.getAmount() +
-                    "\nDate: " + expense.getDate() + "\nDescription: " + expense.getDescription();
+                    "\nFrequency (daily, weekly, monthly, yearly): " + expense.getFrequency() + "\nDescription: " + expense.getDescription();
             JOptionPane.showMessageDialog(null, "Expense Recorded:\n" + expenseInfo);
 
             // Clear input fields after submission
