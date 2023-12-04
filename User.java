@@ -22,5 +22,9 @@ public class User implements Serializable{
         return this.name;
     }
 
+    public int getSavings() {
+        return savings;
+    }
+
 
 }
