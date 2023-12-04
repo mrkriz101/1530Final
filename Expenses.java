@@ -1,13 +1,13 @@
 public class Expenses {
     int amount;
     String category;
-    String date;
+    String frequency;
     String description;
 
-    public Expenses(int amount, String category, String date, String description) {
+    public Expenses(int amount, String category, String frequency, String description) {
         this.amount = amount;
         this.category = category;
-        this.date = date;
+        this.frequency = frequency;
         this.description = description;
     }
 
@@ -19,8 +19,8 @@ public class Expenses {
         return this.category;
     }
 
-    public String getDate() {
-        return this.date;
+    public String getFrequency() {
+        return this.frequency;
     }
 
     public String getDescription() {
