@@ -1,23 +1,20 @@
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.*;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.*;
 
+
+
 public class Money {
+    static JPanel contentPanel;
+    static JFrame frame;
     public static void main(String[] args) {
         String userName;
 
         // Create a JFrame
-        JFrame frame = new JFrame("Money Application");
+         frame = new JFrame("Money Application");
 
         JLabel userField = new JLabel("Please Enter Your Username:");
         JButton loginButton = new JButton("Login");
@@ -31,7 +28,7 @@ public class Money {
         loginPanel.add(loginButton);
 
         // Create a panel for content
-        JPanel contentPanel = new JPanel();
+         contentPanel = new JPanel();
         JTextArea contentArea = new JTextArea(100, 60);
         contentArea.setEditable(false); // Make the content area read-only
         contentPanel.add(contentArea);
@@ -63,7 +60,8 @@ public class Money {
         expenseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                contentArea.setText("Expense logging!");
+                //contentArea.setText("Expense logging!");
+                showExpenseLoggingInputs();
             }
         });
 
@@ -114,5 +112,34 @@ public class Money {
                 contentArea.setVisible(true);
             }
         });
+    }
+    // Method to display Expense Logging inputs
+    private static void showExpenseLoggingInputs() {
+        // Get the components needed for Expense Logging
+        JLabel categoryLabel = new JLabel("Category:");
+        JComboBox<String> categoryComboBox = new JComboBox<>(new String[]{"Food", "Housing", "Other"});
+        JLabel frequencyLabel = new JLabel("Frequency:");
+        JTextField frequencyField = new JTextField(10);
+        JLabel amountLabel = new JLabel("Amount:");
+        JTextField amountField = new JTextField(10);
+        JLabel descriptionLabel = new JLabel("Description:");
+        JTextArea descriptionArea = new JTextArea(4, 20);
+        descriptionArea.setLineWrap(true);
+        JScrollPane scrollPane = new JScrollPane(descriptionArea);
+
+        // Modify contentPanel to add and show components for Expense Logging
+        contentPanel.setLayout(new GridLayout(5, 2, 5, 5));
+        contentPanel.removeAll(); // Clear existing components
+        contentPanel.add(categoryLabel);
+        contentPanel.add(categoryComboBox);
+        contentPanel.add(frequencyLabel);
+        contentPanel.add(frequencyField);
+        contentPanel.add(amountLabel);
+        contentPanel.add(amountField);
+        contentPanel.add(descriptionLabel);
+        contentPanel.add(scrollPane);
+
+        frame.revalidate(); // Refresh the frame to show updated contentPanel
+        frame.repaint();
     }
 }
