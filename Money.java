@@ -1,14 +1,7 @@
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.border.Border;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 
@@ -35,12 +28,17 @@ public class Money {
         }
     }
 
+    static JPanel contentPanel;
+    static JPanel expenseLoggingPanel;
+    static JFrame frame;
+    static CardLayout cardLayout;
+
     public static void main(String[] args) {
         String[] userName = new String[1];
         boolean[] pushed = new boolean[1];
         pushed[0] = false;
         // Create a JFrame
-        JFrame frame = new JFrame("Money Application");
+        frame = new JFrame("Money Application");
 
         JLabel userField = new JLabel("Please Enter Your Username:");
         JButton loginButton = new JButton("Login");
@@ -53,52 +51,51 @@ public class Money {
         loginPanel.add(user);
         loginPanel.add(loginButton);
 
-        // Create a panel for content
-        JPanel contentPanel = new JPanel();
-        JTextArea contentArea = new JTextArea(100, 60);
-        contentArea.setEditable(false); // Make the content area read-only
-        contentPanel.add(contentArea);
+        contentPanel = new JPanel();
+        cardLayout = new CardLayout();
+        contentPanel.setLayout(cardLayout);
 
-        // Create buttons for navigation
+        JPanel budgetPanel = new JPanel();
+        budgetPanel.add(new JLabel("Budget Content!"));
+        
+        expenseLoggingPanel = new JPanel();
+        expenseLoggingPanel.setLayout(new GridLayout(5, 2, 5, 5));
+
+        JPanel savingsPanel = new JPanel();
+        savingsPanel.add(new JLabel("Savings Content!"));
+
+        contentPanel.add(budgetPanel, "Budget");
+        contentPanel.add(expenseLoggingPanel, "ExpenseLogging");
+        contentPanel.add(savingsPanel, "Savings");
+
         JButton budgetButton = new JButton("Budget Planner");
         JButton expenseButton = new JButton("Expense Logging");
         JButton savingsButton = new JButton("Savings Goal");
         JButton homeButton = new JButton("Home");
         JButton exitButton = new JButton("Exit");
 
-        // Add ActionListener to the budget button
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                contentArea.setText("Welcome "+"!");
-            }
-        });
-        
-        // Add ActionListener to the budget button
         budgetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                contentArea.setText("Budget Content!");
+                cardLayout.show(contentPanel, "Budget");
             }
         });
 
-        // Add ActionListener to the expense button
         expenseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                contentArea.setText("Expense logging!");
+                cardLayout.show(contentPanel, "ExpenseLogging");
+                showExpenseLoggingInputs();
             }
         });
 
-        // Add ActionListener to the savings button
         savingsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                contentArea.setText("Savings Button!");
+                cardLayout.show(contentPanel, "Savings");
             }
         });
 
-        // Add ActionListener to the Exit button
         exitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -106,35 +103,29 @@ public class Money {
             }
         });
 
-        // Create a panel for navigation buttons
         JPanel navPanel = new JPanel();
-        //navPanel.add(homeButton);
         navPanel.add(budgetButton);
         navPanel.add(expenseButton);
         navPanel.add(savingsButton);
         navPanel.add(exitButton);
 
-        // Add panels to the frame
         frame.add(contentPanel, BorderLayout.CENTER);
         frame.add(loginPanel, BorderLayout.NORTH);
         frame.add(navPanel, BorderLayout.SOUTH);
         navPanel.setVisible(false);
 
-        // Set frame properties
         frame.setSize(720, 480);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e){
+            public void actionPerformed(ActionEvent e) {
                 String curUsername = user.getText();
                 
                 // check for existence of user within "database"
                 navPanel.setVisible(true);
                 loginPanel.setVisible(false);
-                contentArea.setText("Welcome "+curUsername+"!");
-                contentArea.setVisible(true);
                 userName[0] = curUsername;
                 pushed[0] = true;
             }
@@ -184,5 +175,119 @@ public class Money {
         }
         
     
+    }
+
+    private static void showExpenseLoggingInputs() {
+        JLabel categoryLabel = new JLabel("Category:");
+        JComboBox<String> categoryComboBox = new JComboBox<>(new String[]{"Food", "Housing", "Other"});
+        JLabel frequencyLabel = new JLabel("Frequency:");
+        JTextField frequencyField = new JTextField(10);
+        JLabel amountLabel = new JLabel("Amount:");
+        JTextField amountField = new JTextField(10);
+        JLabel descriptionLabel = new JLabel("Description:");
+        JTextArea descriptionArea = new JTextArea(4, 20);
+        descriptionArea.setLineWrap(true);
+        JScrollPane scrollPane = new JScrollPane(descriptionArea);
+
+        JButton submitButton = new JButton("Submit");
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get entered information
+                int amount = Integer.parseInt(amountField.getText());
+                String category = (String) categoryComboBox.getSelectedItem();
+                String frequency = frequencyField.getText();
+                String description = descriptionArea.getText();
+
+                // Create Expense object
+                Expenses expense = new Expenses(amount, category, frequency, description);
+
+                // Add expense to the list of expenses
+                //user.expenses.add(expense);
+
+                // Optional: Print the added expense for verification
+                System.out.println("Added Expense: " + expense.getAmount() + " | " +
+                                   expense.getCategory() + " | " +
+                                   expense.getFrequency() + " | " +
+                                   expense.getDescription());
+
+                // Clear input fields after submitting
+                amountField.setText("");
+                frequencyField.setText("");
+                descriptionArea.setText("");
+            }
+        });
+
+        expenseLoggingPanel.removeAll();
+        expenseLoggingPanel.add(categoryLabel);
+        expenseLoggingPanel.add(categoryComboBox);
+        expenseLoggingPanel.add(frequencyLabel);
+        expenseLoggingPanel.add(frequencyField);
+        expenseLoggingPanel.add(amountLabel);
+        expenseLoggingPanel.add(amountField);
+        expenseLoggingPanel.add(descriptionLabel);
+        expenseLoggingPanel.add(scrollPane);
+        expenseLoggingPanel.add(submitButton); // Add submit button
+
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private static void showExpenseLoggingInputs() {
+        JLabel categoryLabel = new JLabel("Category:");
+        JComboBox<String> categoryComboBox = new JComboBox<>(new String[]{"Food", "Housing", "Other"});
+        JLabel frequencyLabel = new JLabel("Frequency:");
+        JTextField frequencyField = new JTextField(10);
+        JLabel amountLabel = new JLabel("Amount:");
+        JTextField amountField = new JTextField(10);
+        JLabel descriptionLabel = new JLabel("Description:");
+        JTextArea descriptionArea = new JTextArea(4, 20);
+        descriptionArea.setLineWrap(true);
+        JScrollPane scrollPane = new JScrollPane(descriptionArea);
+
+        JButton submitButton = new JButton("Submit");
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Get entered information
+                int amount = Integer.parseInt(amountField.getText());
+                String category = (String) categoryComboBox.getSelectedItem();
+                String frequency = frequencyField.getText();
+                String description = descriptionArea.getText();
+
+                // Create Expense object
+                Expenses expense = new Expenses(amount, category, frequency, description);
+
+                // Add expense to the list of expenses
+                //user.expenses.add(expense);
+
+                // Optional: Print the added expense for verification
+                System.out.println("Added Expense: " + expense.getAmount() + " | " +
+                                   expense.getCategory() + " | " +
+                                   expense.getFrequency() + " | " +
+                                   expense.getDescription());
+
+                // Clear input fields after submitting
+                amountField.setText("");
+                frequencyField.setText("");
+                descriptionArea.setText("");
+            }
+        });
+
+        expenseLoggingPanel.removeAll();
+        expenseLoggingPanel.add(categoryLabel);
+        expenseLoggingPanel.add(categoryComboBox);
+        expenseLoggingPanel.add(frequencyLabel);
+        expenseLoggingPanel.add(frequencyField);
+        expenseLoggingPanel.add(amountLabel);
+        expenseLoggingPanel.add(amountField);
+        expenseLoggingPanel.add(descriptionLabel);
+        expenseLoggingPanel.add(scrollPane);
+        expenseLoggingPanel.add(submitButton); // Add submit button
+
+        frame.revalidate();
+        frame.repaint();
     }
 }
