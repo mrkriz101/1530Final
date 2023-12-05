@@ -28,6 +28,25 @@ public class Money {
         }
     }
 
+    public void closeConnection(Socket sock)
+    {
+        //send the server Oer word to tell the server we're going to disconnect
+        try{
+            out = new DataOutputStream(sock.getOutputStream());
+            out.writeUTF("Over");
+        }
+        catch(IOException i){
+            System.out.println(i);
+        }
+        //close the socket
+        try {
+            sock.close();
+        }
+        catch (IOException i) {
+            System.out.println(i);
+        }
+    }
+
     static JPanel contentPanel;
     static JPanel expenseLoggingPanel;
     static JFrame frame;
@@ -37,6 +56,17 @@ public class Money {
         String[] userName = new String[1];
         boolean[] pushed = new boolean[1];
         pushed[0] = false;
+
+        //connect to the server
+        Money client = new Money();
+        Socket socket = client.clientConnection();
+        if(socket == null){
+            System.out.println("Socket is null");
+        }
+        else{
+            System.out.println("Socket is not null");
+        }
+
         // Create a JFrame
         frame = new JFrame("Money Application");
 
@@ -99,6 +129,7 @@ public class Money {
         exitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                client.closeConnection(socket);
                 System.exit(0);
             }
         });
@@ -122,7 +153,6 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String curUsername = user.getText();
-                
                 // check for existence of user within "database"
                 navPanel.setVisible(true);
                 loginPanel.setVisible(false);
@@ -132,21 +162,11 @@ public class Money {
         });
 
 
-        
-
-        Money client = new Money();
-        Socket socket = client.clientConnection();
-        if(socket == null){
-            System.out.println("Socket is null");
-        }
-        else{
-            System.out.println("Socket is not null");
-        }
-
+        System.out.println("Waiting for button to be pushed");
         while(!pushed[0]){
-            System.out.println("Waiting for button to be pushed");
+            //System.out.println("Waiting for button to be pushed");
         }
-        
+        System.out.println("Button pushed!");
         //send the username to the server
         try{
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -156,6 +176,7 @@ public class Money {
             System.out.println(i);
         }
         System.out.println("Username sent to server: " + userName[0]);
+        
         //read the user back from the server
         try {
             InputStream input = socket.getInputStream();
@@ -234,60 +255,4 @@ public class Money {
         frame.repaint();
     }
 
-    private static void showExpenseLoggingInputs() {
-        JLabel categoryLabel = new JLabel("Category:");
-        JComboBox<String> categoryComboBox = new JComboBox<>(new String[]{"Food", "Housing", "Other"});
-        JLabel frequencyLabel = new JLabel("Frequency:");
-        JTextField frequencyField = new JTextField(10);
-        JLabel amountLabel = new JLabel("Amount:");
-        JTextField amountField = new JTextField(10);
-        JLabel descriptionLabel = new JLabel("Description:");
-        JTextArea descriptionArea = new JTextArea(4, 20);
-        descriptionArea.setLineWrap(true);
-        JScrollPane scrollPane = new JScrollPane(descriptionArea);
-
-        JButton submitButton = new JButton("Submit");
-
-        submitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get entered information
-                int amount = Integer.parseInt(amountField.getText());
-                String category = (String) categoryComboBox.getSelectedItem();
-                String frequency = frequencyField.getText();
-                String description = descriptionArea.getText();
-
-                // Create Expense object
-                Expenses expense = new Expenses(amount, category, frequency, description);
-
-                // Add expense to the list of expenses
-                //user.expenses.add(expense);
-
-                // Optional: Print the added expense for verification
-                System.out.println("Added Expense: " + expense.getAmount() + " | " +
-                                   expense.getCategory() + " | " +
-                                   expense.getFrequency() + " | " +
-                                   expense.getDescription());
-
-                // Clear input fields after submitting
-                amountField.setText("");
-                frequencyField.setText("");
-                descriptionArea.setText("");
-            }
-        });
-
-        expenseLoggingPanel.removeAll();
-        expenseLoggingPanel.add(categoryLabel);
-        expenseLoggingPanel.add(categoryComboBox);
-        expenseLoggingPanel.add(frequencyLabel);
-        expenseLoggingPanel.add(frequencyField);
-        expenseLoggingPanel.add(amountLabel);
-        expenseLoggingPanel.add(amountField);
-        expenseLoggingPanel.add(descriptionLabel);
-        expenseLoggingPanel.add(scrollPane);
-        expenseLoggingPanel.add(submitButton); // Add submit button
-
-        frame.revalidate();
-        frame.repaint();
-    }
 }

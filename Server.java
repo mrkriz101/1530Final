@@ -35,6 +35,13 @@ public class Server
                 try
                 {
                     line = in.readUTF();
+                    
+                    if(line.equals("Over"))
+                    {
+                        System.out.println("Client sent over");
+                        break;
+                    }
+
                     System.out.println("Searching for user " + line);
                     User user;
                     if(userStorage.containsUser(line))
@@ -68,6 +75,7 @@ public class Server
             // close connection
             socket.close();
             in.close();
+            server.close(); 
         }
         catch(IOException i)
         {
@@ -77,6 +85,9 @@ public class Server
  
     public static void main(String args[])
     {
-        Server server = new Server(1234);
+        Server server;
+        while(true){
+            server = new Server(1234);
+        }
     }
 }
