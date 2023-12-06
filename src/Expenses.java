@@ -1,3 +1,4 @@
+package src;
 
 public class Expenses {
     int amount;

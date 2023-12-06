@@ -1,3 +1,4 @@
+package src;
 //A Client Example for jarod to use to connect to the server code
 import java.io.*;
 import java.net.*;
