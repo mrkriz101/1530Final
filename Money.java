@@ -62,7 +62,6 @@ public class Money {
     private static Object lock = new Object();
 
     public static void main(String[] args) {
-          ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
         String[] userName = new String[1];
         boolean[] pushed = new boolean[1];
         pushed[0] = false;
@@ -126,7 +125,7 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cardLayout.show(contentPanel, "ExpenseLogging");
-                showExpenseLoggingInputs( expensesList );
+                showExpenseLoggingInputs(  );
             }
         });
 
@@ -208,7 +207,7 @@ public class Money {
             in.close(); // Close the ObjectInputStream
 
             // Call showExpenseLoggingInputs() after Actualuser is initialized
-            showExpenseLoggingInputs(expensesList );
+            showExpenseLoggingInputs( );
         } catch (IOException i) {
             System.out.println("IOException while reading from input stream: " + i.getMessage());
             i.printStackTrace(); // Print the stack trace for more details
@@ -216,11 +215,11 @@ public class Money {
             System.out.println("Class not found while deserializing object: " + c.getMessage());
             c.printStackTrace(); // Print the stack trace for more details
         }
-        showExpenseLoggingInputs(expensesList);
+        showExpenseLoggingInputs();
     
     }
 
-    private static void showExpenseLoggingInputs( ArrayList<Expenses> expensesList) {
+    private static void showExpenseLoggingInputs() {
          //ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
         JPanel inputPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -287,7 +286,7 @@ public class Money {
             Expenses expense = new Expenses(amount, category, frequency, description);
 
             // Add expense to the list of expenses
-            expensesList.add(expense);
+            Actualuser.expenses.add(expense);
 
             // Clear input fields after submitting
             amountField.setText("");
@@ -295,7 +294,7 @@ public class Money {
             descriptionArea.setText("");
 
             // Update the display of expenses
-            updateExpenseDisplay(expensesList, expensesPanel);
+            updateExpenseDisplay(expensesPanel);
         }
     });//action listener
     // Creating a panel to display the user's expenses
@@ -303,7 +302,7 @@ public class Money {
     expensesPanel.setLayout(new BoxLayout(expensesPanel, BoxLayout.Y_AXIS));
 
     // Displaying user's expenses on the right side
-    updateExpenseDisplay(expensesList, expensesPanel);
+    updateExpenseDisplay(expensesPanel);
 
     // Add the input panel to the left side and expensesPanel to the right side
     expenseLoggingPanel.removeAll();
@@ -311,19 +310,24 @@ public class Money {
     expenseLoggingPanel.add(inputPanel, BorderLayout.WEST);
     expenseLoggingPanel.add(new JScrollPane(expensesPanel), BorderLayout.CENTER);
 
+    updateExpenseDisplay(expensesPanel);
+
     frame.revalidate();
     frame.repaint();
 }
 
     // Add the input panel to the left side and expensesPanel to the right side
-  private static void updateExpenseDisplay(ArrayList<Expenses> expensesList, JPanel expensesPanel) {
+  private static void updateExpenseDisplay(JPanel expensesPanel) {
+    System.out.println("updating expenses");
+    for (Expenses expense : Actualuser.expenses) {
+            System.out.println(expense.getDescription());
+        }
     expensesPanel.removeAll();
-
-    if (expensesList.isEmpty()) {
+    if (Actualuser.expenses.isEmpty()) {
         JLabel noExpensesLabel = new JLabel("No expenses");
         expensesPanel.add(noExpensesLabel);
     } else {
-        for (Expenses expense : expensesList) {
+        for (Expenses expense : Actualuser.expenses) {
             JLabel expenseLabel = new JLabel("Expense: " + expense.getAmount() + " | " +
                     expense.getCategory() + " | " +
                     expense.getFrequency() + " | " +
