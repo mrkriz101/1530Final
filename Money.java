@@ -59,6 +59,7 @@ public class Money {
     static JPanel expenseLoggingPanel;
     static JFrame frame;
     static CardLayout cardLayout;
+    private static Object lock = new Object();
 
     public static void main(String[] args) {
           ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
@@ -168,13 +169,21 @@ public class Money {
                 loginPanel.setVisible(false);
                 userName[0] = curUsername;
                 pushed[0] = true;
+                synchronized (lock) {
+                    lock.notify();
+                }
             }
         });
 
 
         System.out.println("Waiting for button to be pushed");
-        while(!pushed[0]){
-            //System.out.println("Waiting for button to be pushed");
+        synchronized (lock) {
+            try {
+                System.out.println("Waiting for button to be pushed");
+                lock.wait();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
         System.out.println("Button pushed!");
         //send the username to the server
