@@ -1,4 +1,4 @@
-package src;
+
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ public class User implements Serializable{
     int savings;
     int savingsGoal;
     ArrayList<Expenses> expenses = new ArrayList<Expenses>();
+    ArrayList<Savings> savingsList = new ArrayList<Savings>();
 
     public User(String name, int savings, int savingsGoal) {
         this.name = name;

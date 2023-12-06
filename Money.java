@@ -1,4 +1,4 @@
-package src;
+
 
 import javax.swing.*;
 
@@ -58,6 +58,7 @@ public class Money {
 
     static JPanel contentPanel;
     static JPanel expenseLoggingPanel;
+    static JPanel savingsLoggingPanel;
     static JFrame frame;
     static CardLayout cardLayout;
     private static Object lock = new Object();
@@ -102,16 +103,16 @@ public class Money {
         expenseLoggingPanel = new JPanel();
         expenseLoggingPanel.setLayout(new GridLayout(5, 2, 5, 5));
 
-        JPanel savingsPanel = new JPanel();
-        savingsPanel.add(new JLabel("Savings Content!"));
+        savingsLoggingPanel = new JPanel();
+        savingsLoggingPanel.setLayout(new GridLayout(5, 2, 5, 5));
 
         contentPanel.add(budgetPanel, "Budget");
         contentPanel.add(expenseLoggingPanel, "ExpenseLogging");
-        contentPanel.add(savingsPanel, "Savings");
+        contentPanel.add(savingsLoggingPanel, "Savings");
 
         JButton budgetButton = new JButton("Budget Planner");
         JButton expenseButton = new JButton("Expense Logging");
-        JButton savingsButton = new JButton("Savings Goal");
+        JButton savingsButton = new JButton("Savings Logging");
         JButton homeButton = new JButton("Home");
         JButton exitButton = new JButton("Exit");
 
@@ -126,7 +127,7 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cardLayout.show(contentPanel, "ExpenseLogging");
-                showExpenseLoggingInputs(  );
+                showExpenseLoggingInputs();
             }
         });
 
@@ -134,6 +135,7 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cardLayout.show(contentPanel, "Savings");
+                showSavingsInputs();
             }
         });
 
@@ -340,68 +342,152 @@ public class Money {
     expensesPanel.revalidate();
     expensesPanel.repaint();
 }
+
+    private static void showSavingsInputs() {
+         //ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+    
+        // Create and add input components to the left side panel
+    
+        JLabel amountLabel = new JLabel("Amount:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        inputPanel.add(amountLabel, gbc);
+    
+        JTextField amountField = new JTextField(10);
+        gbc.gridx = 1;
+        inputPanel.add(amountField, gbc);
+    
+        JButton submitButton = new JButton("Submit");
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        inputPanel.add(submitButton, gbc);
+        
+
+    // ActionListener for the submitButton
+    submitButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Get entered information
+            int amount = Integer.parseInt(amountField.getText());
+
+            Savings s = new Savings(amount);
+
+            Actualuser.savingsList.add(s);
+
+            // Clear input fields after submitting
+            amountField.setText("");
+            // Update the display of expenses
+            updateSavingsDisplay(expensesPanel);
+        }
+    });//action listener
+    // Creating a panel to display the user's expenses
+    JPanel savePanel = new JPanel();
+    savePanel.setLayout(new BoxLayout(savePanel, BoxLayout.Y_AXIS));
+
+    // Displaying user's expenses on the right side
+    updateSavingsDisplay(savePanel);
+
+    // Add the input panel to the left side and expensesPanel to the right side
+    savePanel.removeAll();
+    savePanel.setLayout(new BorderLayout());
+    savePanel.add(inputPanel, BorderLayout.WEST);
+    savePanel.add(new JScrollPane(savePanel), BorderLayout.CENTER);
+
+    updateSavingsDisplay(savePanel);
+
+    frame.revalidate();
+    frame.repaint();
+}
+
+    // Add the input panel to the left side and expensesPanel to the right side
+  private static void updateSavingsDisplay(JPanel savePanel) {
+    System.out.println("updating savings");
+    for (Savings s : Actualuser.savingsList) {
+            System.out.println(s);
+        }
+    savePanel.removeAll();
+    if (Actualuser.savingsList.isEmpty()) {
+        JLabel noSavings = new JLabel("No expenses");
+        expensesPanel.add(noSavings);
+    } else {
+        for (Savings s : Actualuser.savingsList) {
+            JLabel saveLabel = new JLabel("Savings: " + s.getAmount() + " | ");
+            expensesPanel.add(saveLabel);
+        }
+    }
+
+    expensesPanel.revalidate();
+    expensesPanel.repaint();
 }
 
 
-//package Final;
-class Expenses {
-    int amount;
-    String category;
-    String frequency;
-    String description;
+}
 
-    public Expenses(int amount, String category, String frequency, String description) {
-        this.amount = amount;
-        this.category = category;
-        this.frequency = frequency;
-        this.description = description;
-    }
 
-    public int getAmount() {
-        return this.amount;
-    }
+// //package Final;
+// class Expenses {
+//     int amount;
+//     String category;
+//     String frequency;
+//     String description;
 
-    public String getCategory() {
-        return this.category;
-    }
+//     public Expenses(int amount, String category, String frequency, String description) {
+//         this.amount = amount;
+//         this.category = category;
+//         this.frequency = frequency;
+//         this.description = description;
+//     }
 
-    public String getFrequency() {
-        return this.frequency;
-    }
+//     public int getAmount() {
+//         return this.amount;
+//     }
 
-    public String getDescription() {
-        return this.description;
-    }
+//     public String getCategory() {
+//         return this.category;
+//     }
+
+//     public String getFrequency() {
+//         return this.frequency;
+//     }
+
+//     public String getDescription() {
+//         return this.description;
+//     }
 
     
-}
+// }
 
 
 
- class User implements Serializable{
+//  class User implements Serializable{
     
-    String name;
-    int savings;
-    int savingsGoal;
-    ArrayList<Expenses> expenses = new ArrayList<Expenses>();
+//     String name;
+//     int savings;
+//     int savingsGoal;
+//     ArrayList<Expenses> expenses = new ArrayList<Expenses>();
 
-    public User(String name, int savings, int savingsGoal) {
-        this.name = name;
-        this.savings = savings;
-        this.savingsGoal = savingsGoal;
-    }
+//     public User(String name, int savings, int savingsGoal) {
+//         this.name = name;
+//         this.savings = savings;
+//         this.savingsGoal = savingsGoal;
+//     }
 
-    public User(String name) {
-        this.name = name;
-    }
+//     public User(String name) {
+//         this.name = name;
+//     }
 
-    public String getName() {
-        return this.name;
-    }
+//     public String getName() {
+//         return this.name;
+//     }
 
-    public int getSavings() {
-        return savings;
-    }
+//     public int getSavings() {
+//         return savings;
+//     }
 
 
-}
+// }
