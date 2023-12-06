@@ -1,3 +1,4 @@
+
 public class Expenses {
     int amount;
     String category;

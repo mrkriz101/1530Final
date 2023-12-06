@@ -1,16 +1,24 @@
+
 import javax.swing.*;
+
+//import Final.User.java;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+
+
 
 public class Money {
-
+   
     private Socket socket = null;
     private DataInputStream input = null;
     private DataOutputStream out = null; 
-    
+    static User Actualuser;
+    private static JPanel expensesPanel;
 
     public Socket clientConnection(){
         try{
@@ -53,10 +61,12 @@ public class Money {
     static CardLayout cardLayout;
 
     public static void main(String[] args) {
+          ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
         String[] userName = new String[1];
         boolean[] pushed = new boolean[1];
         pushed[0] = false;
-
+        expensesPanel = new JPanel();
+        expensesPanel.setLayout(new BoxLayout(expensesPanel, BoxLayout.Y_AXIS));
         //connect to the server
         Money client = new Money();
         Socket socket = client.clientConnection();
@@ -115,7 +125,7 @@ public class Money {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cardLayout.show(contentPanel, "ExpenseLogging");
-                showExpenseLoggingInputs();
+                showExpenseLoggingInputs( expensesList );
             }
         });
 
@@ -177,16 +187,19 @@ public class Money {
         }
         System.out.println("Username sent to server: " + userName[0]);
         
-        //read the user back from the server
+         //read the user back from the server
         try {
             InputStream input = socket.getInputStream();
             ObjectInputStream in = new ObjectInputStream(input);
-            
+                
             // Read the object from the stream
-            User Actualuser = (User) in.readObject();
+            Actualuser = (User) in.readObject();
             System.out.println("User received from server: " + Actualuser.getName());
             
             in.close(); // Close the ObjectInputStream
+
+            // Call showExpenseLoggingInputs() after Actualuser is initialized
+            showExpenseLoggingInputs(expensesList );
         } catch (IOException i) {
             System.out.println("IOException while reading from input stream: " + i.getMessage());
             i.printStackTrace(); // Print the stack trace for more details
@@ -194,65 +207,187 @@ public class Money {
             System.out.println("Class not found while deserializing object: " + c.getMessage());
             c.printStackTrace(); // Print the stack trace for more details
         }
-        
+        showExpenseLoggingInputs(expensesList);
     
     }
 
-    private static void showExpenseLoggingInputs() {
+    private static void showExpenseLoggingInputs( ArrayList<Expenses> expensesList) {
+         //ArrayList<Expenses> expensesList = new ArrayList<Expenses>();
+        JPanel inputPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+    
+        // Create and add input components to the left side panel
         JLabel categoryLabel = new JLabel("Category:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        inputPanel.add(categoryLabel, gbc);
+    
         JComboBox<String> categoryComboBox = new JComboBox<>(new String[]{"Food", "Housing", "Other"});
+        gbc.gridx = 1;
+        inputPanel.add(categoryComboBox, gbc);
+    
         JLabel frequencyLabel = new JLabel("Frequency:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        inputPanel.add(frequencyLabel, gbc);
+    
         JTextField frequencyField = new JTextField(10);
+        gbc.gridx = 1;
+        inputPanel.add(frequencyField, gbc);
+    
         JLabel amountLabel = new JLabel("Amount:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        inputPanel.add(amountLabel, gbc);
+    
         JTextField amountField = new JTextField(10);
+        gbc.gridx = 1;
+        inputPanel.add(amountField, gbc);
+    
         JLabel descriptionLabel = new JLabel("Description:");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        inputPanel.add(descriptionLabel, gbc);
+    
         JTextArea descriptionArea = new JTextArea(4, 20);
         descriptionArea.setLineWrap(true);
         JScrollPane scrollPane = new JScrollPane(descriptionArea);
-
+        gbc.gridx = 1;
+        inputPanel.add(scrollPane, gbc);
+    
         JButton submitButton = new JButton("Submit");
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        inputPanel.add(submitButton, gbc);
+        
 
-        submitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get entered information
-                int amount = Integer.parseInt(amountField.getText());
-                String category = (String) categoryComboBox.getSelectedItem();
-                String frequency = frequencyField.getText();
-                String description = descriptionArea.getText();
+    // ActionListener for the submitButton
+    submitButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Get entered information
+            int amount = Integer.parseInt(amountField.getText());
+            String category = (String) categoryComboBox.getSelectedItem();
+            String frequency = frequencyField.getText();
+            String description = descriptionArea.getText();
 
-                // Create Expense object
-                Expenses expense = new Expenses(amount, category, frequency, description);
+            // Create Expense object
+            Expenses expense = new Expenses(amount, category, frequency, description);
 
-                // Add expense to the list of expenses
-                //user.expenses.add(expense);
+            // Add expense to the list of expenses
+            expensesList.add(expense);
 
-                // Optional: Print the added expense for verification
-                System.out.println("Added Expense: " + expense.getAmount() + " | " +
-                                   expense.getCategory() + " | " +
-                                   expense.getFrequency() + " | " +
-                                   expense.getDescription());
+            // Clear input fields after submitting
+            amountField.setText("");
+            frequencyField.setText("");
+            descriptionArea.setText("");
 
-                // Clear input fields after submitting
-                amountField.setText("");
-                frequencyField.setText("");
-                descriptionArea.setText("");
-            }
-        });
+            // Update the display of expenses
+            updateExpenseDisplay(expensesList, expensesPanel);
+        }
+    });//action listener
+    // Creating a panel to display the user's expenses
+    JPanel expensesPanel = new JPanel();
+    expensesPanel.setLayout(new BoxLayout(expensesPanel, BoxLayout.Y_AXIS));
 
-        expenseLoggingPanel.removeAll();
-        expenseLoggingPanel.add(categoryLabel);
-        expenseLoggingPanel.add(categoryComboBox);
-        expenseLoggingPanel.add(frequencyLabel);
-        expenseLoggingPanel.add(frequencyField);
-        expenseLoggingPanel.add(amountLabel);
-        expenseLoggingPanel.add(amountField);
-        expenseLoggingPanel.add(descriptionLabel);
-        expenseLoggingPanel.add(scrollPane);
-        expenseLoggingPanel.add(submitButton); // Add submit button
+    // Displaying user's expenses on the right side
+    updateExpenseDisplay(expensesList, expensesPanel);
 
-        frame.revalidate();
-        frame.repaint();
+    // Add the input panel to the left side and expensesPanel to the right side
+    expenseLoggingPanel.removeAll();
+    expenseLoggingPanel.setLayout(new BorderLayout());
+    expenseLoggingPanel.add(inputPanel, BorderLayout.WEST);
+    expenseLoggingPanel.add(new JScrollPane(expensesPanel), BorderLayout.CENTER);
+
+    frame.revalidate();
+    frame.repaint();
+}
+
+    // Add the input panel to the left side and expensesPanel to the right side
+  private static void updateExpenseDisplay(ArrayList<Expenses> expensesList, JPanel expensesPanel) {
+    expensesPanel.removeAll();
+
+    if (expensesList.isEmpty()) {
+        JLabel noExpensesLabel = new JLabel("No expenses");
+        expensesPanel.add(noExpensesLabel);
+    } else {
+        for (Expenses expense : expensesList) {
+            JLabel expenseLabel = new JLabel("Expense: " + expense.getAmount() + " | " +
+                    expense.getCategory() + " | " +
+                    expense.getFrequency() + " | " +
+                    expense.getDescription());
+            expensesPanel.add(expenseLabel);
+        }
     }
+
+    expensesPanel.revalidate();
+    expensesPanel.repaint();
+}
+}
+
+
+//package Final;
+class Expenses {
+    int amount;
+    String category;
+    String frequency;
+    String description;
+
+    public Expenses(int amount, String category, String frequency, String description) {
+        this.amount = amount;
+        this.category = category;
+        this.frequency = frequency;
+        this.description = description;
+    }
+
+    public int getAmount() {
+        return this.amount;
+    }
+
+    public String getCategory() {
+        return this.category;
+    }
+
+    public String getFrequency() {
+        return this.frequency;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    
+}
+
+
+
+ class User implements Serializable{
+    
+    String name;
+    int savings;
+    int savingsGoal;
+    ArrayList<Expenses> expenses = new ArrayList<Expenses>();
+
+    public User(String name, int savings, int savingsGoal) {
+        this.name = name;
+        this.savings = savings;
+        this.savingsGoal = savingsGoal;
+    }
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public int getSavings() {
+        return savings;
+    }
+
 
 }
