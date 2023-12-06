@@ -13,6 +13,8 @@ public class Server
     public Server(int port)
     {
         // starts server and waits for a connection
+        //try to read in the users from the file
+        userStorage = userStorage.readState();
         try
         {
             server = new ServerSocket(port);
@@ -65,12 +67,19 @@ public class Server
                     byte[] userBytes = baos.toByteArray();
                     socket.getOutputStream().write(userBytes);
                 }
+                catch(EOFException eof)
+                {
+                    System.out.println("Client has disconnected abruptly"); 
+                    break;
+                }
                 catch(IOException i)
                 {
                     System.out.println(i);
                 }
             }
-            System.out.println("Closing connection");
+            System.out.println("Closing connection Saving State...");
+            userStorage.saveState();
+            System.out.println("State Saved");
  
             // close connection
             socket.close();
